@@ -18,6 +18,7 @@ class ActionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Scripts", style: .plain, target: self, action: #selector(selectScript))
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
         
         let notificationCenter = NotificationCenter.default
@@ -50,6 +51,34 @@ class ActionViewController: UIViewController {
         
         item.attachments = [customJavaScript]
         extensionContext?.completeRequest(returningItems: [item])
+    }
+    
+    @objc func selectScript() {
+        let alertController = UIAlertController(title: "Select a script", message: nil, preferredStyle: .actionSheet)
+        
+        let showTitle = UIAlertAction(title: "Show webpage title", style: .default) { [weak self] _ in
+            self?.insertScript(attribute: "title")
+        }
+        
+        let showURL = UIAlertAction(title: "Show webpage URL", style: .default) {
+            [weak self] _ in
+            self?.insertScript(attribute: "URL")
+        }
+        
+        alertController.addAction(showTitle)
+        alertController.addAction(showURL)
+        
+        present(alertController, animated: true)
+    }
+    
+    func insertScript(attribute: String) {
+        let prewrittenScript = "alert(document.\(attribute));"
+        
+        if script.text == "" {
+            script.text = prewrittenScript
+        } else {
+            script.text += "\n\(prewrittenScript)"
+        }
     }
     
     @objc func adjustForKeyboard(notification: Notification) {
