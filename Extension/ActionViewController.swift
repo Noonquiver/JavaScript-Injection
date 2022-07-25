@@ -21,6 +21,10 @@ class ActionViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Scripts", style: .plain, target: self, action: #selector(selectScript))
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
         
+        let defaults = UserDefaults.standard
+        guard let codeKey = defaults.url(forKey: "URL") else { return }
+        script.text = defaults.string(forKey: codeKey.path)
+        
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
@@ -35,6 +39,9 @@ class ActionViewController: UIViewController {
                     self?.pageURL = javaScriptValues["title"] as? String ?? ""
                     self?.pageURL = javaScriptValues["URL"] as? String ?? ""
                     
+                    let URL = URL(string: self!.pageURL)!
+                    UserDefaults.standard.set(URL, forKey: self!.pageURL)
+                    
                     DispatchQueue.main.async {
                         self?.title = self?.pageTitle
                     }
@@ -44,6 +51,10 @@ class ActionViewController: UIViewController {
     }
 
     @IBAction func done() {
+        let defaults = UserDefaults.standard
+        guard let URLKey = defaults.url(forKey: pageURL) else { return }
+        defaults.set(script.text, forKey: URLKey.path)
+                
         let item = NSExtensionItem()
         let argument: NSDictionary = ["customJavaScript": script.text!]
         let webDictionary: NSDictionary = [NSExtensionJavaScriptFinalizeArgumentKey: argument]
